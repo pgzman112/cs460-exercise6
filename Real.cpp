@@ -376,7 +376,6 @@ Real Real::operator ++ (){
 }
 
 Real Real::operator ++(int){
-  // cout << "WE IN POST" << endl;
   Real temp = Real("1");
   Real r = *this;
   temp = *this + temp;
@@ -392,24 +391,6 @@ Real Real::operator - (const Real & R) const{
   tempR = R.value;
   // Case 1 this is pos, that is neg
   if(this->neg == true && R.neg == false){
-    // if(valueCompare(tempThis, tempR)){
-    //   temp.neg = false;
-    //   // do that - this
-    //   temp.value = subtraction(tempR, tempThis);
-    //   return temp;
-    // }
-    // else if(valueCompare(tempR, tempThis)){
-    //   temp.neg = true;
-    //   // do this - that;
-    //   temp.value = subtraction(tempThis, tempR);
-    //   return temp;
-    // }
-    // else{
-    //   // They are equal and opposite signs
-    //   temp.neg = false;
-    //   temp.value = "0.0";
-    //   return temp;
-    // }
     temp.neg = true;
     temp.value = addition(tempThis, tempR);
   }
@@ -492,13 +473,11 @@ string v2 = R.value;
 // TEMP1 WILL HOLD INT portion when split, and temp2 will hold DEC
 tempStrings t1 = tempStrings();
 t1 = splitString(v1);
-int decLength = validDecimalPlaces(t1.temp2);
 string v1Int = t1.temp1;
 string v1Dec = t1.temp2;
 t1 = splitString(v2);
 string v2Int = t1.temp1;
 string v2Dec = t1.temp2;
-decLength += validDecimalPlaces(t1.temp2);
 if(v1Int.length() < v2Int.length()){
   int diff = v2Int.length() - v1Int.length();
   t1 = padZeros(v1Int, diff, true);
@@ -519,10 +498,10 @@ else if(v2Dec.length() < v1Dec.length()){
   t1 = padZeros(v2Dec, diff, false);
   v2Dec = t1.temp1;
 }
+int decLength = v1Dec.length() + v2Dec.length();
 v1 = v1Int + v1Dec;
 v2 = v2Int + v2Dec;
 string total = "";
-int numZerosToPop = 0;
 for(int i = v2.length()-1; i >= 0; i--){
   string tally = "";
   int carry = 0;
@@ -537,50 +516,26 @@ for(int i = v2.length()-1; i >= 0; i--){
       string t = to_string(x);
       carry = (int)t[0]-48;
       tally.push_back(t[1]);
-      //cout << "Pushing in if: " << (char)t[1] << endl;
-      //cout << "Carry is: " << carry << endl;
     }
     else{
       carry = 0;
       tally += to_string(x);
-      //cout << "Pushing in else: " << to_string(x) << endl;
     }
   } // END inner forloop
   if(carry > 0){
-    //cout << "carry is: " << to_string(carry) << endl;
     tally += to_string(carry);
   }
   if(total.length() < tally.length()){
     for(int n = 0; n < total.length() - tally.length(); n++){
       total.push_back('0');
-      numZerosToPop++;
     }
   }
-  //cout << "adding tally:  " << tally << " and cur total: " << total << endl;
   int tempLength = total.length();
   total = add2(tally, total);
-  if(total.length() > tempLength && tempLength > 0){
-    numZerosToPop++;
-  }
-  //cout << "tot: " << total << endl;
 } // END main forloop
-//cout << "TOTAL: " << total << endl;
-cout << "Dec Length: " << decLength << endl;
-cout << "Total before 1st POP: " << total << endl;
-if(total[total.length()-1] == '0'){
-  while(total[total.length()-1] == '0' && numZerosToPop > 0 && total.length() > decLength){
-    numZerosToPop--;
-    total.pop_back();
-  }
-}
+
 reverse(total.begin(), total.end());
-cout << "Total after 1st and reverse: " << total << endl;
-if(total[total.length()-1] == '0'){
-  while(total[total.length()-1] == '0' && numZerosToPop > 0 && total.length() > decLength){
-    total.pop_back();
-    numZerosToPop--;
-  }
-}
+
 string decPart = "";
 int counter = 0;
 for(int i = total.length()-1; counter < decLength; i--){
@@ -591,8 +546,19 @@ for(int i = total.length()-1; counter < decLength; i--){
 reverse(decPart.begin(), decPart.end());
 //reverse(total.begin(), total.end());
 ret.value = total + "." + decPart;
+while(ret.value[ret.value.length()-1] == '0' && ret.value[ret.value.length()-2] != '.'){
+  ret.value.pop_back();
+}
+reverse(ret.value.begin(), ret.value.end());
+while(ret.value[ret.value.length()-1] == '0'){
+  ret.value.pop_back();
+}
+reverse(ret.value.begin(), ret.value.end());
 if(decPart.length() == 0){
   ret.value.push_back('0');
+}
+if(ret.value[0] == '.'){
+  ret.value = "0" + ret.value;
 }
 return ret;
 }
@@ -1038,16 +1004,8 @@ string Real::add2(const string & v1, const string & v2) const{
 // PLACES (ESSENTIALLY RETURNS 0 IF STRING IS ALL 0S)
 int validDecimalPlaces(string & v1){
   int ret = 0;
-  bool releventDigit = false;
   for(int i = 0; i < v1.length(); i++){
-    if(v1[i] != '0'){
-      releventDigit = true;
-    }
     ret++;
   }
-  if(releventDigit == true){
-    return ret;
-  }
-  else
-    return 0;
+  return ret;
 }

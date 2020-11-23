@@ -83,9 +83,10 @@ int main(){
   cout << "num10-- " << num10-- << endl;
   cout << "num10 after the postDec " << num10 << endl;
 
-
-  Real num20 = Real("0.05");
-  Real num21 = Real("12.0");
+  Real num20 = Real("-11111111222222220.0000000000005");
+  Real num21 = Real("-12.22222221191111110");
+  cout << "Multiplying " << num20 << endl;
+  cout << "with " << num21 << endl;
   num20 = num20 * num21;
   cout << "NUM20 = " << num20 << endl;
 
